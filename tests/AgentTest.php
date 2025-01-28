@@ -168,11 +168,10 @@ class AgentTest extends TestCase
         $this->assertFalse($agent->robot());
     }
 
-    /**
-     * @expectedException \BadMethodCallException
-     */
     public function testCallShouldThrowBadMethodCallException()
     {
+        $this->expectException(\BadMethodCallException::class);
+
         $agent = new Agent();
         $agent->invalidMethod();
     }
@@ -218,6 +217,7 @@ class AgentTest extends TestCase
         foreach ($this->browserVersions as $ua => $version) {
             $agent->setUserAgent($ua);
             $browser = $agent->browser();
+
             $this->assertEquals($version, $agent->version($browser), $ua);
         }
 

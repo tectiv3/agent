@@ -92,7 +92,9 @@ class Agent extends MobileDetect
      */
     protected static CrawlerDetect $crawlerDetect;
 
-    public function getRules(): array
+    protected ?array $temporaryHttpHeaders = null;
+
+    public function getExtendedRules(): array
     {
         static $rules;
 
@@ -197,19 +199,35 @@ class Agent extends MobileDetect
      */
     protected function findDetectionRulesAgainstUA(array $rules, ?string $userAgent = null): bool|string
     {
-        // Loop given rules
-        foreach ($rules as $key => $regex) {
-            if (empty($regex)) {
+        // Begin general search.
+        foreach ($rules as $key => $_regex) {
+            if (empty($_regex)) {
                 continue;
             }
 
-            // Check match
-            if ($this->match($regex, $userAgent)) {
-                return $key ?: reset($this->matchesArray);
+            // regex is an array of "strings"
+            if (is_array($_regex)) {
+                foreach ($_regex as $k => $regexString) {
+                    if ($this->match($regexString, $userAgent)) {
+                        return $key;
+                    }
+                }
+            } else {
+                // assume regex is "string"
+                if ($this->match($_regex, $userAgent)) {
+                    return $key ?: reset($this->matchesArray);
+                }
             }
         }
 
         return false;
+    }
+
+    public function match(string $regex, ?string $userAgent = null): bool
+    {
+        $userAgent ??= $this->userAgent;
+
+        return parent::match($regex, $userAgent);
     }
 
     /**
@@ -250,30 +268,60 @@ class Agent extends MobileDetect
 
     /**
      * Check if the device is a desktop computer.
+     * @param string|null $userAgent deprecated
+     * @param array|null $httpHeaders deprecated
      * @return bool
      * @throws MobileDetectException
      */
-    public function isDesktop(): bool
+    public function isDesktop(?string $userAgent = null, ?array $httpHeaders = null): bool
     {
-        // Check specifically for cloudfront headers if the useragent === 'Amazon CloudFront'
-        if (
-            $this->getUserAgent() === static::$cloudFrontUA
-            && $this->getHttpHeader('HTTP_CLOUDFRONT_IS_DESKTOP_VIEWER') === 'true'
-        ) {
-            return true;
-        }
+        return $this->overrideUAAndHeaders(
+            $userAgent,
+            $httpHeaders,
+            function (?string $userAgent) use ($httpHeaders) {
+                // Check specifically for cloudfront headers if the useragent === 'Amazon CloudFront'
+                if (
+                    $userAgent === static::$cloudFrontUA
+                    && $this->getHttpHeader('HTTP_CLOUDFRONT_IS_DESKTOP_VIEWER') === 'true'
+                ) {
+                    return true;
+                }
 
-        return !$this->isMobile() && !$this->isTablet() && !$this->isRobot();
+                return !$this->isMobile($userAgent, $httpHeaders)
+                    && !$this->isTablet($userAgent, $httpHeaders)
+                    && !$this->isRobot($userAgent);
+            }
+        );
+    }
+
+    public function isMobile(?string $userAgent = null, ?array $httpHeaders = null): bool
+    {
+        return $this->overrideUAAndHeaders(
+            $userAgent,
+            $httpHeaders,
+            fn () => parent::isMobile()
+        );
+    }
+
+    public function isTablet(?string $userAgent = null, ?array $httpHeaders = null): bool
+    {
+        return $this->overrideUAAndHeaders(
+            $userAgent,
+            $httpHeaders,
+            fn () => parent::isTablet()
+        );
     }
 
     /**
      * Check if the device is a mobile phone.
+     * @param string|null $userAgent deprecated
+     * @param array|null $httpHeaders deprecated
      * @return bool
      * @throws MobileDetectException
      */
-    public function isPhone(): bool
+    public function isPhone(?string $userAgent = null, ?array $httpHeaders = null): bool
     {
-        return $this->isMobile() && !$this->isTablet();
+        return $this->isMobile($userAgent, $httpHeaders) && !$this->isTablet($userAgent, $httpHeaders);
     }
 
     /**
@@ -302,31 +350,33 @@ class Agent extends MobileDetect
 
     /**
      * Get the device type
+     * @param string|null $userAgent
+     * @param array|null $httpHeaders
      * @return string
      * @throws MobileDetectException
      */
-    public function deviceType(): string
+    public function deviceType(?string $userAgent = null, ?array $httpHeaders = null): string
     {
-        if ($this->isDesktop()) {
+        if ($this->isDesktop($userAgent, $httpHeaders)) {
             return "desktop";
         }
 
-        if ($this->isPhone()) {
+        if ($this->isPhone($userAgent, $httpHeaders)) {
             return "phone";
         }
 
-        if ($this->isTablet()) {
+        if ($this->isTablet($userAgent, $httpHeaders)) {
             return "tablet";
         }
 
-        if ($this->isRobot()) {
+        if ($this->isRobot($userAgent)) {
             return "robot";
         }
 
         return "other";
     }
 
-    public function version($propertyName, $type = self::VERSION_TYPE_STRING): float|bool|string
+    public function version(string $propertyName, string $type = self::VERSION_TYPE_STRING): float|bool|string
     {
         if (empty($propertyName)) {
             return false;
@@ -391,18 +441,69 @@ class Agent extends MobileDetect
         return $merged;
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function __call(string $name, array $arguments): mixed
-    {
-        // Make sure the name starts with 'is', otherwise
-        if (!str_starts_with($name, 'is')) {
-            throw new BadMethodCallException("No such method exists: $name");
+    protected function overrideUAAndHeaders(
+        ?string $userAgent,
+        ?array $temporaryHttpHeaders,
+        \Closure $callback
+    ) {
+        $ua = $this->userAgent;
+
+        if ($userAgent !== null) {
+            $this->userAgent = $userAgent;
         }
 
-        $key = substr($name, 2);
+        $this->temporaryHttpHeaders = $temporaryHttpHeaders;
 
-        return $this->matchUAAgainstKey($key);
+        $result = $callback($this->userAgent, $this->temporaryHttpHeaders ?? $this->httpHeaders);
+
+        $this->temporaryHttpHeaders = null;
+
+        $this->userAgent = $ua;
+
+        return $result;
+    }
+
+    public function getHttpHeader(string $header): ?string
+    {
+        if ($this->temporaryHttpHeaders !== null) {
+            // are we using PHP-flavored headers?
+            if (!str_contains($header, '_')) {
+                $header = str_replace('-', '_', $header);
+                $header = strtoupper($header);
+            }
+
+            // test the alternate, too
+            $altHeader = 'HTTP_' . $header;
+
+            //Test both the regular and the HTTP_ prefix
+            if (isset($this->temporaryHttpHeaders[$header])) {
+                return $this->temporaryHttpHeaders[$header];
+            } elseif (isset($this->temporaryHttpHeaders[$altHeader])) {
+                return $this->temporaryHttpHeaders[$altHeader];
+            }
+
+            return null;
+        }
+
+        return parent::getHttpHeader($header);
+    }
+
+    protected function matchUserAgentWithRule(string $ruleName): bool
+    {
+        $result = false;
+        // Make the keys lowercase, so we can match: isIphone(), isiPhone(), isiphone(), etc.
+        $ruleName = strtolower($ruleName);
+        // change the keys to lower case
+        $_rules = array_change_key_case($this->getExtendedRules());
+
+        if (false === empty($_rules[$ruleName])) {
+            $regexString = $_rules[$ruleName];
+            if (is_array($_rules[$ruleName])) {
+                $regexString = implode("|", $_rules[$ruleName]);
+            }
+            $result = $this->match($regexString, $this->getUserAgent());
+        }
+
+        return $result;
     }
 }
