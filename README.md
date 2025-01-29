@@ -1,11 +1,14 @@
 Agent
 =====
 
-[![Latest Stable Version](http://img.shields.io/packagist/v/jenssegers/agent.svg)](https://packagist.org/packages/jenssegers/agent) [![Total Downloads](http://img.shields.io/packagist/dm/jenssegers/agent.svg)](https://packagist.org/packages/jenssegers/agent) [![Build Status](http://img.shields.io/travis/jenssegers/agent.svg)](https://travis-ci.org/jenssegers/agent) [![Coverage Status](http://img.shields.io/coveralls/jenssegers/agent.svg)](https://coveralls.io/r/jenssegers/agent) [![Donate](https://img.shields.io/badge/donate-paypal-blue.svg)](https://www.paypal.me/jenssegers)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/asika32764/agent/ci.yml?style=for-the-badge)
+[![Packagist Version](https://img.shields.io/packagist/v/asika/agent?style=for-the-badge)
+](https://packagist.org/packages/asika/agent)
+[![Packagist Downloads](https://img.shields.io/packagist/dt/asika/agent?style=for-the-badge)](https://packagist.org/packages/asika/agent)
 
 A PHP desktop/mobile user agent parser with support for Laravel, based on [Mobile Detect](https://github.com/serbanghita/Mobile-Detect) with desktop support and additional functionality.
 
-> This is a modified version to support PHP 8.0 up and MobileDetect 4.x.
+> This is a modified version of [jenssegers/agent](https://github.com/jenssegers/agent) to support PHP 8.0 up and MobileDetect 4.x.
 
 <p align="center">
 <img src="https://jenssegers.com/static/media/agent.png" height="275">
@@ -63,7 +66,7 @@ Check for a certain property in the user agent.
 $agent->is('Windows');
 $agent->is('Firefox');
 $agent->is('iPhone');
-$agent->is('OS X');
+$agent->is('macOS');
 ```
 
 ### Magic is-method
