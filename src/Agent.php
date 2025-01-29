@@ -6,6 +6,7 @@ use BadMethodCallException;
 use Detection\Exception\MobileDetectException;
 use Detection\MobileDetect;
 use Jaybizzle\CrawlerDetect\CrawlerDetect;
+use Psr\SimpleCache\CacheInterface;
 
 class Agent extends MobileDetect
 {
@@ -60,7 +61,7 @@ class Agent extends MobileDetect
         'IE' => 'MSIE|IEMobile|MSIEMobile|Trident/[.0-9]+',
         'Netscape' => 'Netscape',
         'Mozilla' => 'Mozilla',
-        'WeChat'  => 'MicroMessenger',
+        'WeChat' => 'MicroMessenger',
     ];
 
     /**
@@ -93,6 +94,23 @@ class Agent extends MobileDetect
     protected static CrawlerDetect $crawlerDetect;
 
     protected ?array $temporaryHttpHeaders = null;
+
+    public function __construct(
+        ?string $userAgent = null,
+        ?array $httpHeaders = [],
+        ?CacheInterface $cache = null,
+        array $config = []
+    ) {
+        parent::__construct($cache, $config);
+
+        if ($userAgent !== null) {
+            $this->setUserAgent($userAgent);
+        }
+
+        if ($httpHeaders !== null) {
+            $this->setHttpHeaders($httpHeaders);
+        }
+    }
 
     public function getExtendedRules(): array
     {
@@ -161,7 +179,9 @@ class Agent extends MobileDetect
 
     /**
      * Get accept languages.
-     * @param string|null $acceptLanguage
+     *
+     * @param  string|null  $acceptLanguage
+     *
      * @return array
      */
     public function languages(?string $acceptLanguage = null): array
@@ -193,8 +213,10 @@ class Agent extends MobileDetect
 
     /**
      * Match a detection rule and return the matched key.
-     * @param  array $rules
-     * @param string|null $userAgent
+     *
+     * @param  array        $rules
+     * @param  string|null  $userAgent
+     *
      * @return string|bool
      */
     protected function findDetectionRulesAgainstUA(array $rules, ?string $userAgent = null): bool|string
@@ -232,7 +254,9 @@ class Agent extends MobileDetect
 
     /**
      * Get the browser name.
-     * @param  string|null $userAgent
+     *
+     * @param  string|null  $userAgent
+     *
      * @return string|bool
      */
     public function browser(string|null $userAgent = null): bool|string
@@ -242,7 +266,9 @@ class Agent extends MobileDetect
 
     /**
      * Get the platform name.
-     * @param string|null $userAgent
+     *
+     * @param  string|null  $userAgent
+     *
      * @return string|bool
      */
     public function platform(?string $userAgent = null): bool|string
@@ -252,7 +278,9 @@ class Agent extends MobileDetect
 
     /**
      * Get the device name.
-     * @param string|null $userAgent
+     *
+     * @param  string|null  $userAgent
+     *
      * @return string|bool
      */
     public function device(?string $userAgent = null): bool|string
@@ -268,8 +296,10 @@ class Agent extends MobileDetect
 
     /**
      * Check if the device is a desktop computer.
-     * @param string|null $userAgent deprecated
-     * @param array|null $httpHeaders deprecated
+     *
+     * @param  string|null  $userAgent    deprecated
+     * @param  array|null   $httpHeaders  deprecated
+     *
      * @return bool
      * @throws MobileDetectException
      */
@@ -299,7 +329,7 @@ class Agent extends MobileDetect
         return $this->overrideUAAndHeaders(
             $userAgent,
             $httpHeaders,
-            fn () => parent::isMobile()
+            fn() => parent::isMobile()
         );
     }
 
@@ -308,14 +338,16 @@ class Agent extends MobileDetect
         return $this->overrideUAAndHeaders(
             $userAgent,
             $httpHeaders,
-            fn () => parent::isTablet()
+            fn() => parent::isTablet()
         );
     }
 
     /**
      * Check if the device is a mobile phone.
-     * @param string|null $userAgent deprecated
-     * @param array|null $httpHeaders deprecated
+     *
+     * @param  string|null  $userAgent    deprecated
+     * @param  array|null   $httpHeaders  deprecated
+     *
      * @return bool
      * @throws MobileDetectException
      */
@@ -326,7 +358,9 @@ class Agent extends MobileDetect
 
     /**
      * Get the robot name.
-     * @param string|null $userAgent
+     *
+     * @param  string|null  $userAgent
+     *
      * @return string|bool
      */
     public function robot(?string $userAgent = null): bool|string
@@ -340,7 +374,9 @@ class Agent extends MobileDetect
 
     /**
      * Check if device is a robot.
-     * @param string|null $userAgent
+     *
+     * @param  string|null  $userAgent
+     *
      * @return bool
      */
     public function isRobot(?string $userAgent = null): bool
@@ -350,8 +386,10 @@ class Agent extends MobileDetect
 
     /**
      * Get the device type
-     * @param string|null $userAgent
-     * @param array|null $httpHeaders
+     *
+     * @param  string|null  $userAgent
+     * @param  array|null   $httpHeaders
+     *
      * @return string
      * @throws MobileDetectException
      */
@@ -391,7 +429,6 @@ class Agent extends MobileDetect
 
         // Check if the property exists in the properties array.
         if (true === isset($properties[$propertyName])) {
-
             // Prepare the pattern to be matched.
             // Make sure we always deal with an array (string is converted).
             $properties[$propertyName] = (array) $properties[$propertyName];
@@ -419,7 +456,9 @@ class Agent extends MobileDetect
 
     /**
      * Merge multiple rules into one array.
-     * @param array $all
+     *
+     * @param  array  $all
+     *
      * @return array
      */
     protected static function mergeRules(...$all): array
