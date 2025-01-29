@@ -96,8 +96,8 @@ class Agent extends MobileDetect
     protected ?array $temporaryHttpHeaders = null;
 
     public function __construct(
-        ?string $userAgent = null,
         ?array $httpHeaders = [],
+        ?string $userAgent = null,
         ?CacheInterface $cache = null,
         array $config = []
     ) {
