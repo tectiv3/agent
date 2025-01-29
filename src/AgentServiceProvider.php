@@ -1,6 +1,6 @@
 <?php
 
-namespace Jenssegers\Agent;
+namespace Asika\Agent;
 
 use Illuminate\Support\ServiceProvider;
 

@@ -5,6 +5,8 @@ Agent
 
 A PHP desktop/mobile user agent parser with support for Laravel, based on [Mobile Detect](https://github.com/serbanghita/Mobile-Detect) with desktop support and additional functionality.
 
+> This is a modified version to support PHP 8.0 up and MobileDetect 4.x.
+
 <p align="center">
 <img src="https://jenssegers.com/static/media/agent.png" height="275">
 </p>
@@ -15,7 +17,7 @@ Installation
 Install using composer:
 
 ```bash
-composer require jenssegers/agent
+composer require asika/agent
 ```
 
 Laravel (optional)
@@ -24,13 +26,13 @@ Laravel (optional)
 Add the service provider in `config/app.php`:
 
 ```php
-Jenssegers\Agent\AgentServiceProvider::class,
+Asika\Agent\AgentServiceProvider::class,
 ```
 
 And add the Agent alias to `config/app.php`:
 
 ```php
-'Agent' => Jenssegers\Agent\Facades\Agent::class,
+'Agent' => Asika\Agent\Facades\Agent::class,
 ```
 
 Basic Usage
@@ -39,7 +41,7 @@ Basic Usage
 Start by creating an `Agent` instance (or use the `Agent` Facade if you are using Laravel):
 
 ```php
-use Jenssegers\Agent\Agent;
+use Asika\Agent\Agent;
 
 $agent = new Agent();
 ```
