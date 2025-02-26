@@ -545,4 +545,14 @@ class Agent extends MobileDetect
 
         return $result;
     }
+    
+    public static function flattenHeaders(array $httpHeaders): string
+    {
+        $key = '';
+        foreach ($httpHeaders as $name => $value) {
+            $value = is_array($value) ? $value[0]: $value;
+            $key .= "$name: $value" . PHP_EOL;
+        }
+        return trim($key);
+    }
 }
