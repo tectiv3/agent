@@ -1,6 +1,6 @@
 <?php
 
-namespace Asika\Agent\Facades;
+namespace Jenssegers\Agent\Facades;
 
 use Illuminate\Support\Facades\Facade;
 

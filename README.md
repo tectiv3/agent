@@ -1,10 +1,10 @@
 Agent
 =====
 
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/asika32764/agent/ci.yml?style=for-the-badge)
-[![Packagist Version](https://img.shields.io/packagist/v/asika/agent?style=for-the-badge)
-](https://packagist.org/packages/asika/agent)
-[![Packagist Downloads](https://img.shields.io/packagist/dt/asika/agent?style=for-the-badge)](https://packagist.org/packages/asika/agent)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/jenssegers32764/agent/ci.yml?style=for-the-badge)
+[![Packagist Version](https://img.shields.io/packagist/v/jenssegers/agent?style=for-the-badge)
+](https://packagist.org/packages/jenssegers/agent)
+[![Packagist Downloads](https://img.shields.io/packagist/dt/jenssegers/agent?style=for-the-badge)](https://packagist.org/packages/jenssegers/agent)
 
 A PHP desktop/mobile user agent parser with support for Laravel, based on [Mobile Detect](https://github.com/serbanghita/Mobile-Detect) with desktop support and additional functionality.
 
@@ -20,7 +20,7 @@ Installation
 Install using composer:
 
 ```bash
-composer require asika/agent
+composer require jenssegers/agent
 ```
 
 Laravel (optional)
@@ -29,13 +29,13 @@ Laravel (optional)
 Add the service provider in `config/app.php`:
 
 ```php
-Asika\Agent\AgentServiceProvider::class,
+Jenssegers\Agent\AgentServiceProvider::class,
 ```
 
 And add the Agent alias to `config/app.php`:
 
 ```php
-'Agent' => Asika\Agent\Facades\Agent::class,
+'Agent' => Jenssegers\Agent\Facades\Agent::class,
 ```
 
 Basic Usage
@@ -44,7 +44,7 @@ Basic Usage
 Start by creating an `Agent` instance (or use the `Agent` Facade if you are using Laravel):
 
 ```php
-use Asika\Agent\Agent;
+use Jenssegers\Agent\Agent;
 
 $agent = new Agent();
 ```

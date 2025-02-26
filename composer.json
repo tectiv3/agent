@@ -1,9 +1,9 @@
 {
-    "name": "asika/agent",
+    "name": "jenssegers/agent",
     "description": "Desktop/mobile user agent parser with support for Laravel, based on Mobiledetect",
     "keywords": ["laravel", "useragent", "agent", "user agent", "browser", "platform", "mobile", "desktop"],
-    "homepage": "https://github.com/asika32764/agent",
     "license" : "MIT",
+    "homepage": "https://github.com/jenssegers/agent",
     "authors": [
         {
             "name": "Jens Segers",
@@ -25,7 +25,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Asika\\Agent\\": "src/"
+            "Jenssegers\\Agent\\": "src/"
         }
     },
     "extra": {
@@ -34,10 +34,10 @@
         },
         "laravel": {
             "providers": [
-                "Asika\\Agent\\AgentServiceProvider"
+                "Jenssegers\\Agent\\AgentServiceProvider"
             ],
             "aliases": {
-                "Agent": "Asika\\Agent\\Facades\\Agent"
+                "Agent": "Jenssegers\\Agent\\Facades\\Agent"
             }
         }
     },
